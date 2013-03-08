@@ -1,0 +1,8 @@
+{% block field_row %}
+    <div class="form_row">
+        {{ form_label(form, null, { 'attr': {'class': 'field-label'} }) }}
+         {{ form_errors(form) }}
+        {{ form_widget(form, { 'attr': {'class': 'field-widget'} }) }}
+    </div>
+{% endblock field_row %}
+ 

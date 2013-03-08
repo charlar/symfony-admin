@@ -1,0 +1,20 @@
+{% extends "CRLAdminBundle::layout.html.twig" %}
+{% form_theme form 'CRLAdminBundle:Form:fields.html.twig' %}
+{% block csscontent %}
+.field-label {
+	width: 150;
+}
+{% endblock %}
+
+
+{% block title "Symfony - Admin Add Record" %}
+
+{% block content_header '' %}
+
+{% block content %}
+<h2>{{ entity }} - Add</h2>
+<form action="{{ addurl }}" method="post" {{ form_enctype(form) }}>
+    {{ form_rest(form) }}
+<input type="submit"  value="Add Record" />
+</form>
+{% endblock %}

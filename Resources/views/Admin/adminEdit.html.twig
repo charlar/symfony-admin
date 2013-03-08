@@ -1,0 +1,23 @@
+{% extends "CRLAdminBundle::layout.html.twig" %}
+{% form_theme form 'CRLAdminBundle:Form:fields.html.twig' %}
+{% block csscontent %}
+.field-label {
+	width: 150;
+    display: inline-block;
+}
+.field-widget {
+    display: inline-block;
+}
+{% endblock %}
+
+{% block title "Symfony - Admin Edit" %}
+
+{% block content_header '' %}
+
+{% block content %}
+<h2>{{ entity }} - Edit</h2>
+<form action="{{ editurl }}" method="post" {{ form_enctype(form) }}>
+    {{ form_rest(form) }}
+<input type="submit" value="Update Record" />
+
+{% endblock %}

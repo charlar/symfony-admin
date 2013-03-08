@@ -1,0 +1,16 @@
+{% extends "CRLAdminBundle::layout.html.twig" %}
+
+
+{% block title "Symfony - Admin Index" %}
+
+{% block content_header '' %}
+
+{% block content %}
+{% for obj in metadatas %}
+  {{ obj.name }}
+  <a href="{{ obj.structurl }}">Structure</a>
+  <a href="{{ obj.browseurl }}">Browse</a>
+  <a href="{{ obj.addurl }}">Add</a>
+  <br />
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,24 @@
+<html>
+<head>
+<style type="text/css">
+{% include "CRLAdminBundle::layout.css.html.twig" %}
+{% block csscontent %}
+{% endblock %}
+-->
+</style>
+</head>
+<body>
+<center>
+<div class="page">
+	<div class="top">
+	<a href="{{ path('_admin') }}">Admin Home</a>
+	</div>
+	
+	<div class="content">
+	{% block content %}
+	{% endblock %}
+	</div>
+</div>
+</center>
+</body>
+</html>
