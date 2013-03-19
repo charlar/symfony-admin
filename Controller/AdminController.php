@@ -20,45 +20,28 @@ use Symfony\Component\Security\Core\SecurityContext;
 
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
+use CRL\AdminBundle\Database\DoctrineDatabase;
+
 class AdminController extends Controller
 {
-    /**
-     * Returns an array of fields. Fields can be both column fields and
-     * association fields.
-	 * (copied from DoctrineFormGenerator.php)
-     *
-     * @param ClassMetadataInfo $metadata
-     * @return array $fields
-     */
-    private function getFieldsFromMetadata(ClassMetadataInfo $metadata)
-    {
-        $fields = (array) $metadata->fieldNames;
+	private function getAddURL($ent)
+	{
+  	  return $this->generateUrl('_admin_add', array('entityenc' => $ent->getEntitySlug()));
+	}
 
-        // Remove the primary key field if it's not managed manually
-        if (!$metadata->isIdentifierNatural()) {
-            $fields = array_diff($fields, $metadata->identifier);
-        }
-
-        foreach ($metadata->associationMappings as $fieldName => $relation) {
-            if ($relation['type'] !== ClassMetadataInfo::ONE_TO_MANY) {
-                $fields[] = $fieldName;
-            }
-        }
-
-        return $fields;
-    }
+	private function getStructURL($ent)
+	{
+		return $this->generateUrl('_admin_struct', array('entityenc' => $ent->getEntitySlug()));
+	}
 	
-    private function getEntityForm($adminobj, ClassMetadataInfo $metadata)
-    {
-			$formbuilder = $this->createFormBuilder($adminobj);
-//		foreach ($metadata->getColumnNames() as $columnName)
-        foreach ($this->getFieldsFromMetadata($metadata) as $propertyName)
-		{
-//		  $propertyName = $metadata->getFieldName($columnName);
-		  $formbuilder->add($propertyName);
-		}
-        $form = $formbuilder->getForm();
-		return $form;
+	private function getBrowseURL($ent,$page)
+	{
+		return $this->generateUrl('_admin_browse', array('entityenc' => $ent->getEntitySlug(), 'page' => 0));
+	}
+	
+	private function getEditURL($ent,$id)
+	{
+		return $this->generateUrl('_admin_edit', array('entityenc' => $ent->getEntitySlug(), 'id' => $id));
 	}
 
     /**
@@ -67,37 +50,45 @@ class AdminController extends Controller
      */
     public function indexAction()
     {
-		$em = $this->getDoctrine()->getEntityManager();
-		$metadatas = $em->getMetadataFactory()->getAllMetadata();
+		$db = new DoctrineDatabase($this);
+		
+		$dbentities = $db->getAllEntities();
+
 		$entities = array();
-		foreach ($metadatas as $md)
+		$namespace = array();
+		foreach ($dbentities as $dbe)
 		{
-		   $entityenc = bin2hex($md->name);
-		   $structurl = $this->generateUrl('_admin_struct', array('entity' => $entityenc, ));
-		   $browseurl =  $this->generateUrl('_admin_browse', array('entityenc' => $entityenc, 'page' => 0));
-  	       $addurl =  $this->generateUrl('_admin_add', array('entityenc' => $entityenc));
-		   $entity = array('name' => $md->name,
+		   $entityenc = $dbe->getEntitySlug();
+		   $structurl = $this->getStructURL($dbe);
+		   $browseurl =  $this->getBrowseURL($dbe,0);
+  	       $addurl =  $this->getAddURL($dbe);
+		   $entity = array('name' => $dbe->getName(),
+		   				   'namespace' => $dbe->getNamespace(),
 		                   'structurl' => $structurl,
 						   'browseurl' => $browseurl,
 						   'addurl' => $addurl
 		     		);
 			$entities[] = $entity;
+			$namespace[$dbe->getNamespace()] = array();
 		}
-		return array('metadatas' => $entities);
-    }
+	
+		foreach ($entities as $ent)
+		{
+		  $namespace[$ent['namespace']][] = $ent;
+		}
 
+		return array('metadatas' => $entities, 'sortedmetadatas' => $namespace);
+    }
     /**
-     * @Route("/struct/{entity}", name="_admin_struct")
+     * @Route("/struct/{entityenc}", name="_admin_struct")
      * @Template()
      */
-    public function adminStructAction($entity)
+    public function adminStructAction($entityenc)
     {
-		$entity = pack("H*" , $entity);
-		$em = $this->getDoctrine()->getEntityManager();
-		$metadata = $em->getMetadataFactory()->getMetadataFor($entity);
-		// if the slug is valid, log them in and redirect to the password change page
-		return array('entity' => $entity, 'metadata' => var_export($metadata, TRUE));
-   //		return array('entity' => $entity, 'metadata' => $metadata->getColumnNames());
+		$db = new DoctrineDatabase($this);
+		$ent = $db->getEntityBySlug($entityenc);
+		$metadata = $ent->getMetadata();
+		return array('entity' => $ent->getName(), 'metadata' => var_export($metadata, TRUE));
    }
 
     /**
@@ -106,28 +97,24 @@ class AdminController extends Controller
      */
     public function adminBrowseAction($entityenc, $page)
     {
-		$entity = pack("H*" , $entityenc);
-		$em = $this->getDoctrine()->getEntityManager();
-//		$metadata = $em->getMetadataFactory()->getMetadataFor($entity);
-		
-//		$repository = $this->getDoctrine()->getRepository($entity);
-		$repository = $em->getRepository($entity);
-		$res = $repository->findAll();
+	    $count = 10;
+		$db = new DoctrineDatabase($this);
+		$ent = $db->getEntityBySlug($entityenc);
+		$entity = $ent->getName();
 		$items = array();
-		foreach ($res as $r)
+		foreach ($ent->getObjects($page * $count, $count) as $item)
 		{
-		  $id = $r->getId();
-		  $name = $id;
-		  if (method_exists($r, '__toString')) $name = $r->__toString();
-  	      $editurl =  $this->generateUrl('_admin_edit', array('entityenc' => $entityenc, 'id' => $id));
-//		  $items[] = array('id' => $r->getId(), 'name' => $r->getId());
-		  $items[] = array('name' => $name, 'editurl' => $editurl);
+		  $editurl = $this->getEditURL($ent,$item['id']);
+		  $items[] = array('name' => $item['name'], 'editurl' => $editurl);
 		}
 		
-  	    $addurl =  $this->generateUrl('_admin_add', array('entityenc' => $entityenc));
+  	    $addurl =  $this->getAddURL($ent);
+  	    $nexturl = $this->getBrowseURL($ent,$page+1);
+  	    $prevurl = $this->getBrowseURL($ent,$page-1);
 
 		// if the slug is valid, log them in and redirect to the password change page
-		return array('entity' => $entity, 'metadata' => $items);
+		return array('entity' => $entity, 'metadata' => $items,
+		             'addurl' => $addurl, 'nexturl' => $nexturl, 'prevurl' => $prevurl);
     }
 
     /**
@@ -136,25 +123,14 @@ class AdminController extends Controller
      */
     public function adminEditAction(Request $request, $entityenc, $id)
     {
-		$entity = pack("H*" , $entityenc);
-  	    $editurl =  $this->generateUrl('_admin_edit', array('entityenc' => $entityenc, 'id' => $id));
+		$db = new DoctrineDatabase($this);
+		$ent = $db->getEntityBySlug($entityenc);
+		$entity = $ent->getName();
+		$editurl =  $this->getEditURL($ent, $id);
 		
-		$em = $this->getDoctrine()->getEntityManager();
-		$repository = $em->getRepository($entity);
-		$adminobj = $repository->find($id);
+		$adminobj = $ent->getObjectById($id);
+		$form = $ent->getEntityForm($adminobj);
 
-		$metadata = $em->getMetadataFactory()->getMetadataFor($entity);
-
-///		$formbuilder = $this->createFormBuilder($adminobj);
-//		foreach ($metadata->getColumnNames() as $columnName)
-//		{
-//		  $propertyName = $metadata->getFieldName($columnName);
-//		  $formbuilder->add($propertyName);
-//		}
-//        $form = $formbuilder->getForm();
-        $form = $this->getEntityForm($adminobj, $metadata);
-
-		// if the slug is valid, log them in and redirect to the password change page
 		return array('editurl' => $editurl, 'form' => $form->createView(), 'entity' => $entity);
     }
 
@@ -164,16 +140,12 @@ class AdminController extends Controller
      */
     public function adminAddAction(Request $request, $entityenc)
     {
-		$entity = pack("H*" , $entityenc);
-  	    $addurl =  $this->generateUrl('_admin_add', array('entityenc' => $entityenc));
-		
-		$em = $this->getDoctrine()->getEntityManager();
-		$repository = $em->getRepository($entity);
-		$adminobj = new $entity;   //	$repository->find($id);
-		$metadata = $em->getMetadataFactory()->getMetadataFor($entity);
-        $form = $this->getEntityForm($adminobj, $metadata);
-
-		// if the slug is valid, log them in and redirect to the password change page
+		$db = new DoctrineDatabase($this);
+		$ent = $db->getEntityBySlug($entityenc);
+		$entity = $ent->getName();
+  	    $addurl =  $this->getAddURL($ent);
+		$adminobj = $ent->getNewObject();
+		$form = $ent->getEntityForm($adminobj);
 		return array('addurl' => $addurl, 'form' => $form->createView(), 'entity' => $entity);
     }
 }

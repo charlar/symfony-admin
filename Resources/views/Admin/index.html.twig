@@ -6,6 +6,7 @@
 {% block content_header '' %}
 
 {% block content %}
+{% if 0 %}
 {% for obj in metadatas %}
   {{ obj.name }}
   <a href="{{ obj.structurl }}">Structure</a>
@@ -13,4 +14,17 @@
   <a href="{{ obj.addurl }}">Add</a>
   <br />
 {% endfor %}
+{% endif %}
+
+{% for mdname,md in sortedmetadatas %}
+  <h2>{{ mdname }}</h2>
+  {% for obj in md %}
+	  {{ obj.name }}
+	  <a href="{{ obj.structurl }}">Structure</a>
+	  <a href="{{ obj.browseurl }}">Browse</a>
+	  <a href="{{ obj.addurl }}">Add</a>
+	  <br />
+  {% endfor %}
+{% endfor %}
+
 {% endblock %}
