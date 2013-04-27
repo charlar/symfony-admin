@@ -87,7 +87,9 @@ class DoctrineEntity	// extends AbstractEntity
 	public function getObjects($start, $count)
 	{
 		$repository = $this->db->getRepository($this->md->name);
-		$res = $repository->findAll();
+//		$res = $repository->findAll();
+//		findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+		$res = $repository->findBy(array(),null,$count,$start);
 		$items = array();
 		foreach ($res as $r)
 		{
@@ -98,5 +100,12 @@ class DoctrineEntity	// extends AbstractEntity
 		}
 	  return $items;
 	}
+	
+	public function persistEntity($obj)
+	{
+		// should verify object type $this->md->name;   //	$repository->find($id);
+		$this->db->persistEntity($obj);
+	}
+	
 
 }

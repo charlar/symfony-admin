@@ -46,5 +46,11 @@ class DoctrineDatabase	// extends AbstractDatabase
 		}
 		return null;
 	}
+	
+	public function persistEntity($entity)
+	{
+		$this->em->persist($entity);
+		$this->em->flush();
+	}
 
 }

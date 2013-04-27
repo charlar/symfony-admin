@@ -9,5 +9,7 @@
 {% for obj in metadata %}
   <a href="{{ obj.editurl }}">{{ obj.name }}<a><br />
 {% endfor %}
-
+<br />
+<br />
+<a href="{{ prevurl }}">Prev</a> | <a href="{{ nexturl }}">Next</a><br />
 {% endblock %}

@@ -36,7 +36,7 @@ class AdminController extends Controller
 	
 	private function getBrowseURL($ent,$page)
 	{
-		return $this->generateUrl('_admin_browse', array('entityenc' => $ent->getEntitySlug(), 'page' => 0));
+		return $this->generateUrl('_admin_browse', array('entityenc' => $ent->getEntitySlug(), 'page' => $page));
 	}
 	
 	private function getEditURL($ent,$id)
@@ -130,6 +130,12 @@ class AdminController extends Controller
 		
 		$adminobj = $ent->getObjectById($id);
 		$form = $ent->getEntityForm($adminobj);
+		
+		if ($request->getMethod() == 'POST') {
+			$form->bindRequest($request);		// change to bind in 2.1
+			$ent->persistEntity($adminobj);		// does the flush
+		}
+
 
 		return array('editurl' => $editurl, 'form' => $form->createView(), 'entity' => $entity);
     }
@@ -146,6 +152,12 @@ class AdminController extends Controller
   	    $addurl =  $this->getAddURL($ent);
 		$adminobj = $ent->getNewObject();
 		$form = $ent->getEntityForm($adminobj);
+		
+		if ($request->getMethod() == 'POST') {
+			$form->bindRequest($request);		// change to bind in 2.1
+			$ent->persistEntity($adminobj);		// does the flush
+		}
+
 		return array('addurl' => $addurl, 'form' => $form->createView(), 'entity' => $entity);
     }
 }
