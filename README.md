@@ -1,7 +1,7 @@
 symfony-admin
 =============
 
-1) Installing the admin bundle.
+## Installing the admin bundle.
 
 The admin bundle should install as a bundle using composer.
 
@@ -18,7 +18,7 @@ In the alternative, follow the following steps:
 		type:     annotation
 		prefix:   /admin
 
-2) Using the admin bundle
+## Using the admin bundle
 
 	1) Navigate to /admin, you will get a list of Entities.
 	2) each data object will have a link to view structure, browse data and add.
@@ -27,7 +27,7 @@ In the alternative, follow the following steps:
 	4) clicking on the entity will allow you to edit it.
 	5) from the data object main page, clicking add, will allow you to create a new object
 	
-Bugs:
+## Bugs:
 
 This is a proof of concept, and certainly rife with bugs.  Contributions are welcome.  I wish
 a well developed version of this had been part of the standard Symfony distribution, like
