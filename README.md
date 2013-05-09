@@ -6,6 +6,7 @@ symfony-admin
 The admin bundle should install as a bundle using composer.
 
 In the alternative, follow the following steps:
+
 	1) Place the CRL/Admin directory with CRL rooted
 	either in /Symfony/src or in /Symfony/vendor/bundles
 	
