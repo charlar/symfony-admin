@@ -79,6 +79,17 @@ class AdminController extends Controller
 
 		return array('metadatas' => $entities, 'sortedmetadatas' => $namespace);
     }
+	
+    /**
+     * @Route("/settings", name="_admin_settings")
+     * @Template()
+     */
+    public function adminSettingsAction()
+    {
+		$config = $this->container->getParameter('crl_admin.config');
+		return array('config' => var_export($config, TRUE));
+   }
+
     /**
      * @Route("/struct/{entityenc}", name="_admin_struct")
      * @Template()
