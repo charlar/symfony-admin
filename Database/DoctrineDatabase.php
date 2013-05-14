@@ -53,4 +53,10 @@ class DoctrineDatabase	// extends AbstractDatabase
 		$this->em->flush();
 	}
 
+	public function deleteEntity($entity)
+	{
+		$this->em->remove($entity);
+		$this->em->flush();
+	}
+
 }

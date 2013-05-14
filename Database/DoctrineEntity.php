@@ -118,5 +118,11 @@ class DoctrineEntity	// extends AbstractEntity
 		$this->db->persistEntity($obj);
 	}
 	
+	public function deleteEntity($obj)
+	{
+		// should verify object type $this->md->name;   //	$repository->find($id);
+		$this->db->deleteEntity($obj);
+	}
+	
 
 }

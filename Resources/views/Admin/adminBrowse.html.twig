@@ -7,9 +7,15 @@
 {% block content %}
 <h2>{{ entity }} - Browse</h2>
 {% for obj in metadata %}
-  <a href="{{ obj.editurl }}">{{ obj.name }}<a><br />
+  <a href="{{ obj.editurl }}">{{ obj.name }}<a>
+  <a href="{{ obj.deleteurl }}">Delete<a><br />
 {% endfor %}
 <br />
 <br />
-<a href="{{ prevurl }}">Prev</a> | <a href="{{ nexturl }}">Next</a><br />
+{% if prevurl is not null %}
+<a href="{{ prevurl }}">Prev</a>
+{% else  %}
+<b>Prev</b>
+{% endif  %}
+ | <a href="{{ nexturl }}">Next</a><br />
 {% endblock %}

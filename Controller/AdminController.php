@@ -44,6 +44,11 @@ class AdminController extends Controller
 		return $this->generateUrl('_admin_edit', array('entityenc' => $ent->getEntitySlug(), 'id' => $id));
 	}
 
+	private function getDeleteURL($ent,$id)
+	{
+		return $this->generateUrl('_admin_delete', array('entityenc' => $ent->getEntitySlug(), 'id' => $id));
+	}
+
     /**
      * @Route("/", name="_admin")
      * @Template()
@@ -116,12 +121,18 @@ class AdminController extends Controller
 		foreach ($ent->getObjects($page * $count, $count) as $item)
 		{
 		  $editurl = $this->getEditURL($ent,$item['id']);
-		  $items[] = array('name' => $item['name'], 'editurl' => $editurl);
+		  $deleteurl = $this->getDeleteURL($ent,$item['id']);
+		  $items[] = array('name' => $item['name'],
+		  				 'editurl' => $editurl, 'deleteurl' => $deleteurl);
 		}
 		
   	    $addurl =  $this->getAddURL($ent);
   	    $nexturl = $this->getBrowseURL($ent,$page+1);
-  	    $prevurl = $this->getBrowseURL($ent,$page-1);
+		$prevurl = null;
+		if ($page > 0) {
+  	    	$prevurl = $this->getBrowseURL($ent,$page-1);
+		}
+		
 
 		// if the slug is valid, log them in and redirect to the password change page
 		return array('entity' => $entity, 'metadata' => $items,
@@ -149,6 +160,32 @@ class AdminController extends Controller
 
 
 		return array('editurl' => $editurl, 'form' => $form->createView(), 'entity' => $entity);
+    }
+
+    /**
+     * @Route("/delete/{entityenc}/{id}", name="_admin_delete")
+     * @Template()
+     */
+    public function adminDeleteAction(Request $request, $entityenc, $id)
+    {
+		$db = new DoctrineDatabase($this);
+		$ent = $db->getEntityBySlug($entityenc);
+		$entity = $ent->getName();
+		$deleteurl =  $this->getDeleteURL($ent, $id);
+		
+		$adminobj = $ent->getObjectById($id);
+		$form = $ent->getEntityForm($adminobj);
+		
+		if ($request->getMethod() == 'POST') {
+			// delete the object
+			$ent->deleteEntity($adminobj);		// does the flush
+			// redirect to the list using 303 - see other
+		  $browse_url =  $this->getBrowseURL($ent,0);
+	      return $this->redirect($browse_url, 303);
+		}
+
+
+		return array('deleteurl' => $deleteurl, 'form' => $form->createView(), 'entity' => $entity);
     }
 
     /**
