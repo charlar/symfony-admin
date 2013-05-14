@@ -4,6 +4,8 @@ namespace CRL\AdminBundle\Database;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\Exception\PropertyAccessDeniedException;
 
 class DoctrineEntity	// extends AbstractEntity
 {
@@ -37,10 +39,19 @@ class DoctrineEntity	// extends AbstractEntity
 
     public function getEntityForm($adminobj)
     {
+	    $propertyAccessor = PropertyAccess::getPropertyAccessor();
 		$formbuilder = $this->db->getContainer()->createFormBuilder($adminobj);
         foreach ($this->getFieldsFromMetadata($this->md) as $propertyName)
 		{
-		  $formbuilder->add($propertyName);
+		  try {
+		    // this will throw an error if not accessable
+			$propVal = $propertyAccessor->getValue($adminobj, $propertyName);
+		    $formbuilder->add($propertyName);
+			}
+			// should add the property to a list in this catch, so we can
+			// let the user know what properties can't be accessed.
+			catch (PropertyAccessDeniedException $e) { }
+			catch (Exception $e) { }
 		}
         $form = $formbuilder->getForm();
 		return $form;
