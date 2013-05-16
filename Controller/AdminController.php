@@ -48,6 +48,11 @@ class AdminController extends Controller
 	{
 		return $this->generateUrl('_admin_delete', array('entityenc' => $ent->getEntitySlug(), 'id' => $id));
 	}
+	
+	public function getContainer()
+	{
+	  return $this->container;
+	}
 
     /**
      * @Route("/", name="_admin")

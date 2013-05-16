@@ -8,11 +8,14 @@ class DoctrineDatabase	// extends AbstractDatabase
 {
     private $container;
 	private $em;
+	public $usehash;
 
     public function __construct(ContainerAwareInterface $container)
     {
         $this->container = $container;
 		$this->em = $this->container->getDoctrine()->getEntityManager();
+		$config = $this->container->getContainer()->getParameter('crl_admin.config');
+		$this->usehash = $config['hash'];
     }
 	
 	public function getRepository($name)

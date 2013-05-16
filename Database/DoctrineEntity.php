@@ -66,7 +66,12 @@ class DoctrineEntity	// extends AbstractEntity
 	
 	public function getEntitySlug()
 	{
-		return bin2hex($this->md->name);
+		if ($this->db->usehash) {
+			return hash('md4',$this->md->name);
+		}
+		else {
+			return bin2hex($this->md->name);
+		}
 	}
 	
 	public function getName()
